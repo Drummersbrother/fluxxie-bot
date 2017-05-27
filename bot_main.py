@@ -317,6 +317,14 @@ async def on_ready():
     helpers.log_info("fluxx-bot has now logged in as: {0} with id {1}".format(client.user.name, client.user.id))
 
 
+async def join_send_pm(member: discord.Member):
+    """This function pm's a user when they join a configured server, and gives them a rule rundown."""
+
+    # We check if the server is on the list of servers who use the pm message feature
+    if int(member.server.id) in [x[0] for x in config["join_msg"]["server_and_channel_id_pairs"]]:
+        # We send the pm message
+        await client.send_message(member, config["join_msg"]["pm_msg"].format(member.mention, member.server.name))
+
 async def join_welcome_message(member: discord.Member):
     """This function is called when a user joins a server, and welcomes them if the server has enabled the welcome message feature."""
 
@@ -573,7 +581,7 @@ def start_fluxx():
     admin_commands.extend(commands[1])
 
     # The functions to call when someone joins the server, these get passed the member object of the user who joined
-    join_functions = [join_welcome_message]
+    join_functions = [join_welcome_message, join_send_pm]
 
     # The list of message ids (this list will fill and empty) that the command checker should ignore
     ignored_command_message_ids = []
